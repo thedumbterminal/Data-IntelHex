@@ -16,14 +16,12 @@ sub new{
 sub toHex{
 	my($self, $data) = @_;
 	my $hex = "";
-	#create extended record
 	my $address = 0;
 	my $wrapCount = 0;
-	#$hex .= $self->createLine($address, 4, chr(0) . chr($wrapCount));
 	for(my $i = 0; $i < length($data); $i += $self->__getLineLength()){
 		if($address == 0 || $address > 65535){	#at the start or bigger than 16 bit range
-			$address = 0;	#rset
-			$hex .= $self->createLine($address, 4, chr(0) . chr($wrapCount));
+			$address = 0;	#reset
+			$hex .= $self->createLine($address, 4, chr(0) . chr($wrapCount));	#create extended record
 			$wrapCount++;
 		}
 		my $lineData = substr($data, $i, $self->__getLineLength());
@@ -53,11 +51,10 @@ sub createLine{
 	foreach my $char (@chars){	#deal with each binary character one at a time
 		my $hexChar = sprintf("%02X", ord($char));	#convert character to hex
 		$line .= $hexChar;
-		#print "$checksum += " . hex($hexChar) . "\n";
-		$checksum += hex($hexChar);
+		$checksum += ord($char);
 	}
 	my $class = ref($self);
-	$line .= $class->__calcHexChecksum($checksum);	
+	$line .= sprintf("%02X", (-$checksum & 0xFF));	#calculate checksum
 	$line .= $self->__getLineEnding();
 	return $line;
 }
@@ -98,12 +95,6 @@ sub __getLineEnding{
 		confess("No line ending given in options");
 	}
 	return $ending;
-}
-##################################################################################################
-sub __calcHexChecksum{
-	my($class, $sum) = @_;
-	my $hexChecksum = sprintf("%02X", (-$sum & 0xFF));		
-	return $hexChecksum;
 }
 ##################################################################################################
 return 1;

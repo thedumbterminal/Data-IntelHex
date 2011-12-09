@@ -3,7 +3,7 @@ use warnings;
 use Test::More;
 use lib qw(lib ../lib);
 use Data::IntelHex;
-plan(tests => 6);
+plan(tests => 7);
 
 {
 	my %config = (
@@ -66,13 +66,27 @@ plan(tests => 6);
 	);
 
 	my $intel = Data::IntelHex->new(\%config);
+	my $hex = $intel->createLine(0, 4, chr(0x00) . chr(0x00));
+
+	#5
+	is($hex, ":020000040000FA\n", "createLine() for extended address record");
+}
+
+{
+	my %config = (
+		"lineLength" => 32,
+		"padding" => 0,
+		"lineEnding" => "\n"
+	);
+
+	my $intel = Data::IntelHex->new(\%config);
 
 	#padding test
 
 	my $hex = $intel->toHex("123456789");
 	
-	#5
-	is($hex, ":020000040000FA\n:090000003132333435363738391A\n:00000001FF\n", "toHex() with short data");
+	#6
+	is($hex, ":020000040000FA\n:090000003132333435363738391A\n:00000001FF", "toHex() with short data");
 }
 
 {
@@ -88,6 +102,6 @@ plan(tests => 6);
 
 	my $hex = $intel->toHex("123456789");
 	
-	#6
-	is($hex, ":020000040000FA\n:20000000313233343536373839FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF1A\n:00000001FF\n", "toHex() with short data padded");
+	#7
+	is($hex, ":020000040000FA\n:20000000313233343536373839FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF1A\n:00000001FF", "toHex() with short data padded");
 }
