@@ -1,11 +1,12 @@
 #!/usr/bin/perl
-#convert firmware from intel hex to binary
+#convert from intel hex to binary
 use strict;
 use warnings;
 my $output = "";
 while(my $line = <>){
 	$line =~ s/(\n|\r\n)//;
-	if($line =~ m/^\:[A-Z0-9]{8}([A-Z0-9]{64})[A-Z0-9]{2}$/){
+	#print STDERR "got line: '" . $line . "'\n";
+	if($line =~ m/^\:[A-Z0-9]{2}[A-Z0-9]{4}00([A-Z0-9]+)[A-Z0-9]{2}$/){	#only care about data records
 		$output .= pack("H*", $1);
 	}
 	else{
